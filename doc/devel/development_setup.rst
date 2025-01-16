@@ -1,3 +1,5 @@
+.. highlight:: bash
+
 .. redirect-from:: /devel/gitwash/configure_git
 .. redirect-from:: /devel/gitwash/dot2_dot3
 .. redirect-from:: /devel/gitwash/following_latest
@@ -25,11 +27,12 @@ Fork the Matplotlib repository
 ==============================
 
 Matplotlib is hosted at https://github.com/matplotlib/matplotlib.git. If you
-plan on solving issues or submit pull requests to the main Matplotlib
-repository, you should first *fork* this repository by visiting
-https://github.com/matplotlib/matplotlib.git and clicking on the
-``Fork`` button on the top right of the page (see
-`the GitHub documentation <https://docs.github.com/get-started/quickstart/fork-a-repo>`__ for more details.)
+plan on solving issues or submitting pull requests to the main Matplotlib
+repository, you should first fork this repository by *clicking* the
+:octicon:`repo-forked` **Fork** button near the top of the `project repository <https://github.com/matplotlib/matplotlib>`_ page.
+
+This creates a copy of the code under your account on the GitHub server. See `the GitHub
+documentation <https://docs.github.com/get-started/quickstart/fork-a-repo>`__ for more details.
 
 Retrieve the latest version of the code
 =======================================
@@ -108,8 +111,9 @@ Create a dedicated environment
 You should set up a dedicated environment to decouple your Matplotlib
 development from other Python and Matplotlib installations on your system.
 
-The simplest way to do this is to use either Python's virtual environment
-`venv`_ or `conda`_.
+We recommend using one of the following options for a dedicated development environment
+because these options are configured to install the Python dependencies as part of their
+setup.
 
 .. _venv: https://docs.python.org/3/library/venv.html
 .. _conda: https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
@@ -131,9 +135,15 @@ The simplest way to do this is to use either Python's virtual environment
       On some systems, you may need to type ``python3`` instead of ``python``.
       For a discussion of the technical reasons, see `PEP-394 <https://peps.python.org/pep-0394>`_.
 
+      Install the Python dependencies with ::
+
+        pip install -r requirements/dev/dev-requirements.txt
+
+      Remember to activate the environment whenever you start working on Matplotlib!
+
    .. tab-item:: conda environment
 
-      Create a new `conda`_ environment with ::
+      Create a new `conda`_ environment and install the Python dependencies with ::
 
         conda env create -f environment.yml
 
@@ -146,39 +156,124 @@ The simplest way to do this is to use either Python's virtual environment
 
         conda activate mpl-dev
 
-Remember to activate the environment whenever you start working on Matplotlib.
+      Remember to activate the environment whenever you start working on Matplotlib!
+
+   .. tab-item:: :octicon:`codespaces` GitHub Codespaces
+
+      `GitHub Codespaces <https://docs.github.com/codespaces>`_ is a cloud-based
+      in-browser development environment that comes with the appropriate setup to
+      contribute to Matplotlib.
+
+      #. Open codespaces on your fork by clicking on the green :octicon:`code` ``Code``
+         button on the GitHub web interface and selecting the ``Codespaces`` tab.
+
+      #. Next, click on "Open codespaces on <your branch name>". You will be
+         able to change branches later, so you can select the default
+         ``main`` branch.
+
+      #. After the codespace is created, you will be taken to a new browser
+         tab where you can use the terminal to activate a pre-defined conda
+         environment called ``mpl-dev``::
+
+         conda activate mpl-dev
+
+      Remember to activate the *mpl-dev* environment whenever you start working on
+      Matplotlib.
+
+      If you need to open a GUI window with Matplotlib output on Codespaces, our
+      configuration includes a `light-weight Fluxbox-based desktop
+      <https://github.com/devcontainers/features/tree/main/src/desktop-lite>`_.
+      You can use it by connecting to this desktop via your web browser. To do this:
+
+      #. Press ``F1`` or ``Ctrl/Cmd+Shift+P`` and select
+         ``Ports: Focus on Ports View`` in the VSCode session to bring it into
+         focus. Open the ports view in your tool, select the ``noVNC`` port, and
+         click the Globe icon.
+      #. In the browser that appears, click the Connect button and enter the desktop
+         password (``vscode`` by default).
+
+      Check the `GitHub instructions
+      <https://github.com/devcontainers/features/tree/main/src/desktop-lite#connecting-to-the-desktop>`_
+      for more details on connecting to the desktop.
+
+      If you also built the documentation pages, you can view them using Codespaces.
+      Use the "Extensions" icon in the activity bar to install the "Live Server"
+      extension. Locate the ``doc/build/html`` folder in the Explorer, right click
+      the file you want to open and select "Open with Live Server."
+
+
+Install external dependencies
+=============================
+
+Python dependencies were installed as part of :ref:`setting up the environment <dev-environment>`.
+Additionally, the following non-Python dependencies must also be installed locally:
+
+.. rst-class:: checklist
+
+* :ref:`c++ compiler<compile-dependencies>`
+* :ref:`external tools used by the documentation build <doc-dependencies-external>`
+
+
+For a full list of dependencies, see :ref:`dependencies`. External dependencies do not
+need to be installed when working in codespaces.
+
+.. _development-install:
 
 Install Matplotlib in editable mode
 ===================================
 
-Install Matplotlib in editable mode from the :file:`matplotlib` directory
-using the command ::
+Install Matplotlib in editable mode from the :file:`matplotlib` directory using the
+command ::
 
-    python -m pip install -ve .
+    python -m pip install --verbose --no-build-isolation --editable ".[dev]"
 
-The 'editable/develop mode', builds everything and places links in your Python
-environment so that Python will be able to import Matplotlib from your
-development source directory.  This allows you to import your modified version
-of Matplotlib without re-installing after every change. Note that this is only
-true for ``*.py`` files.  If you change the C-extension source (which might
-also happen if you change branches) you will have to re-run
-``python -m pip install -ve .``
+The 'editable/develop mode' builds everything and places links in your Python environment
+so that Python will be able to import Matplotlib from your development source directory.
+This allows you to import your modified version of Matplotlib without having to
+re-install after changing a ``.py`` or compiled extension file.
+
+When working on a branch that does not have Meson enabled, meaning it does not
+have :ghpull:`26621` in its history (log), you will have to reinstall from source
+each time you change any compiled extension code.
+
+If the installation is not working, please consult the :ref:`troubleshooting guide <troubleshooting-faq>`.
+If the guide does not offer a solution, please reach out via `chat <https://gitter.im/matplotlib/matplotlib>`_
+or :ref:`open an issue <submitting-a-bug-report>`.
+
+
+Build options
+-------------
+If you are working heavily with files that need to be compiled, you may want to
+inspect the compilation log. This can be enabled by setting the environment
+variable :envvar:`MESONPY_EDITABLE_VERBOSE` or by setting the ``editable-verbose``
+config during installation ::
+
+   python -m pip install --no-build-isolation --config-settings=editable-verbose=true --editable .
+
+For more information on installation and other configuration options, see the
+Meson Python :external+meson-python:ref:`editable installs guide <how-to-guides-editable-installs>`.
+
+For a list of the other environment variables you can set before install, see :ref:`environment-variables`.
+
 
 Verify the Installation
 =======================
 
-Run the following command to make sure you have correctly installed Matplotlib in editable mode.
-The command should be run when the virtual environment is activated ::
+Run the following command to make sure you have correctly installed Matplotlib in
+editable mode. The command should be run when the virtual environment is activated::
 
     python -c "import matplotlib; print(matplotlib.__file__)"
 
 This command should return : ``<matplotlib_local_repo>\lib\matplotlib\__init__.py``
 
-We encourage you to run tests and build docs to verify that the code installed correctly and that the docs build cleanly,
-so that when you make code or document related changes you are aware of the existing issues beforehand.
+We encourage you to run tests and build docs to verify that the code installed correctly
+and that the docs build cleanly, so that when you make code or document related changes
+you are aware of the existing issues beforehand.
 
-   * Run test cases to verify installation :ref:`testing`
-   * Verify documentation build :ref:`documenting-matplotlib`
+* Run test cases to verify installation :ref:`testing`
+* Verify documentation build :ref:`documenting-matplotlib`
+
+.. _pre-commit-hooks:
 
 Install pre-commit hooks
 ========================
@@ -208,3 +303,9 @@ listed in ``.pre-commit-config.yaml``, against the full codebase with ::
 To run a particular hook manually, run ``pre-commit run`` with the hook id ::
 
     pre-commit run <hook id> --all-files
+
+
+Please note that the ``mypy`` pre-commit hook cannot check the :ref:`type-hints`
+for new functions; instead the stubs for new functions are checked using the
+``stubtest`` :ref:`CI check <automated-tests>` and can be checked locally using
+``tox -e stubtest``.

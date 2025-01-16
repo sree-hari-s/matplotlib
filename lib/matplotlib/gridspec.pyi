@@ -3,7 +3,7 @@ from typing import Any, Literal, overload
 from numpy.typing import ArrayLike
 import numpy as np
 
-from matplotlib.axes import Axes, SubplotBase
+from matplotlib.axes import Axes
 from matplotlib.backend_bases import RendererBase
 from matplotlib.figure import Figure
 from matplotlib.transforms import Bbox
@@ -30,7 +30,7 @@ class GridSpecBase:
     def set_height_ratios(self, height_ratios: ArrayLike | None) -> None: ...
     def get_height_ratios(self) -> ArrayLike: ...
     def get_grid_positions(
-        self, fig: Figure, raw: bool = ...
+        self, fig: Figure
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]: ...
     @staticmethod
     def _check_gridspec_exists(figure: Figure, nrows: int, ncols: int) -> GridSpec: ...
@@ -54,7 +54,7 @@ class GridSpecBase:
         sharey: bool | Literal["all", "row", "col", "none"] = ...,
         squeeze: Literal[True] = ...,
         subplot_kw: dict[str, Any] | None = ...
-    ) -> np.ndarray | SubplotBase | Axes: ...
+    ) -> np.ndarray | Axes: ...
 
 class GridSpec(GridSpecBase):
     left: float | None
